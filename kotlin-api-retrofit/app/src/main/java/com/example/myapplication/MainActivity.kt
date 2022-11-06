@@ -3,28 +3,16 @@ package com.example.myapplication
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import org.json.JSONException
-import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.MalformedURLException
-import java.net.URL
-import java.util.logging.Level
-import java.util.logging.Logger
-import kotlin.concurrent.thread
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_ID = "extra_id"
     }
-    val apiService = APIService()
+    private val apiService = APIService.getService()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,10 +28,10 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        thread {
-            val users = apiService.getAllUsers()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val users = apiService.getUsers()
             list.addAll(users)
-            runOnUiThread {
+            withContext(Dispatchers.Main) {
                 adapter.notifyDataSetChanged()
             }
         }

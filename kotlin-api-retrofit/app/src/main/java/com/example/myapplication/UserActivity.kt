@@ -3,10 +3,11 @@ package com.example.myapplication
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
-import kotlin.concurrent.thread
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.*
 
 class UserActivity : AppCompatActivity() {
-    val apiService = APIService()
+    private val apiService = APIService.getService()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
@@ -18,9 +19,9 @@ class UserActivity : AppCompatActivity() {
         val phone = findViewById<TextView>(R.id.textViewPhone)
 
         val id = intent.getIntExtra(MainActivity.EXTRA_ID, 0)
-        thread {
+        lifecycleScope.launch(Dispatchers.IO) {
             val user = apiService.getUserById(id)
-            runOnUiThread {
+            withContext(Dispatchers.Main) {
                 name.text = user?.name
                 username.text = user?.username
                 email.text = user?.email
